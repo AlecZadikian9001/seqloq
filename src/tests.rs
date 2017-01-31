@@ -2,6 +2,8 @@
 //!
 //! Unless you're writing custom benchmarks, you don't need this.
 
+#![feature(old_io)]
+
 use std::old_io::timer;
 use std::time::Duration;
 use std::sync::{Arc, Mutex, RwLock};
