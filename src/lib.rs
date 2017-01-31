@@ -1,3 +1,4 @@
+#![feature(old_io)]
 #![feature(unsafe_destructor)]
 #![feature(core, std_misc, io, test)]
 #![deny(warnings)]
