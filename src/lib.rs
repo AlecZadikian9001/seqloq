@@ -1,5 +1,4 @@
 #![feature(old_io)]
-#![feature(unsafe_destructor)]
 #![feature(core, std_misc, io, test)]
 #![deny(warnings)]
 
@@ -14,6 +13,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::default::Default;
 
 /// Reader-writer lock with writer priority and optimistic reads.
+#[derive(Default)]
 pub struct Seqloq<T> {
     mutex: Mutex<()>,
     seqnum: AtomicUsize,
@@ -58,8 +58,7 @@ impl<T> Seqloq<T>
     ///
     /// The callback will run more than once, if a concurrent write occurs.
     #[inline]
-    fn peek<F, R>(&self, mut f: F) -> R
-        where F: FnMut(*const T) -> R,
+    fn read(&self) -> *mut T
     {
         loop {
             let old = self.seqnum.load(Ordering::SeqCst);
@@ -69,7 +68,7 @@ impl<T> Seqloq<T>
                 continue;
             }
 
-            let res = f(self.data.get());
+            let res = self.data.get();
 
             let new = self.seqnum.load(Ordering::SeqCst);
             if new == old {
@@ -119,7 +118,6 @@ impl<'a, T> DerefMut for SeqloqGuard<'a, T> {
     }
 }
 
-#[unsafe_destructor]
 impl<'a, T> Drop for SeqloqGuard<'a, T> {
     #[inline]
     fn drop(&mut self) {
