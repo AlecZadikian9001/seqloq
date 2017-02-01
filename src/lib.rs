@@ -13,8 +13,6 @@ use std::sync::{Mutex, MutexGuard};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::default::Default;
 
-pub mod seqloq;
-
 /// Reader-writer lock with writer priority and optimistic reads.
 pub struct Seqloq<T> {
     mutex: Mutex<()>,
