@@ -58,7 +58,7 @@ impl<T> Seqloq<T>
     ///
     /// The callback will run more than once, if a concurrent write occurs.
     #[inline]
-    fn read(&self) -> *mut T
+    pub fn read(&self) -> *mut T
     {
         loop {
             let old = self.seqnum.load(Ordering::SeqCst);
@@ -75,15 +75,6 @@ impl<T> Seqloq<T>
                 return res;
             }
         }
-    }
-
-    /// Read the data without locking.
-    ///
-    /// Unlike `peek`, this involves a copy.  But it's safe, and it's sometimes
-    /// just as fast as `peek`.
-    #[inline]
-    pub fn read(&self) -> T {
-        self.peek(|x| unsafe { *x })
     }
 
     /// Lock for exclusive, read/write access.
