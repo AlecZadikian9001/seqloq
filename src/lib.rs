@@ -11,6 +11,7 @@ use std::ops::{Deref, DerefMut};
 use std::cell::UnsafeCell;
 use std::sync::{Mutex, MutexGuard};
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::default::Default;
 
 pub mod seqloq;
 
@@ -38,7 +39,7 @@ pub struct SeqloqGuard<'a, T: 'a> {
 }
 
 impl<T> Seqloq<T>
-    where T: Send + Copy,
+    where T: Send,
 {
     #[inline]
     pub fn new(t: T) -> Seqloq<T> {
@@ -59,7 +60,7 @@ impl<T> Seqloq<T>
     ///
     /// The callback will run more than once, if a concurrent write occurs.
     #[inline]
-    pub fn peek<F, R>(&self, mut f: F) -> R
+    fn peek<F, R>(&self, mut f: F) -> R
         where F: FnMut(*const T) -> R,
     {
         loop {
@@ -93,7 +94,7 @@ impl<T> Seqloq<T>
     /// Readers will see changes, but will automatically re-try until they have
     /// a consistent view.
     #[inline]
-    pub fn lock<'a>(&'a self) -> SeqloqGuard<'a, T> {
+    pub fn write<'a>(&'a self) -> SeqloqGuard<'a, T> {
         let guard = self.mutex.lock().unwrap();
         non_atomic_increment(&self.seqnum);
         SeqloqGuard {
